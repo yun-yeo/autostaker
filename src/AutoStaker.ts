@@ -42,7 +42,7 @@ export default class AutoStaker {
       msgs
     });
 
-    const result = await this.wallet.lcd.tx.broadcast(tx);
+    const result = await this.wallet.lcd.tx.broadcastSync(tx);
 
     if (isTxError(result)) {
       console.log(JSON.stringify(result));
