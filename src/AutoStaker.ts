@@ -10,6 +10,7 @@ import {
 } from '@terra-money/terra.js';
 
 const MNEMONIC = process.env.MNEMONIC;
+const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
 const COIN_TYPE = parseInt(process.env.COIN_TYPE as string);
 
 export default class AutoStaker {
@@ -19,6 +20,7 @@ export default class AutoStaker {
   constructor() {
     const key = new MnemonicKey({
       mnemonic: MNEMONIC,
+      index: MNEMONIC_INDEX,
       coinType: COIN_TYPE
     });
 
