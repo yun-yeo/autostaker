@@ -79,7 +79,11 @@ export default class AutoStaker {
     );
 
     // if no rewards exists, skip procedure
-    if (poolInfo.reward_index == rewardInfoResponse.reward_infos[0].index) {
+    if (
+      rewardInfoResponse.reward_infos.length == 0 ||
+      poolInfo.reward_index == rewardInfoResponse.reward_infos[0].index
+    ) {
+      console.log('No rewards');
       return;
     }
 

@@ -1,0 +1,1 @@
+rewardInfoResponse.reward_infos;
