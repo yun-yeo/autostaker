@@ -92,7 +92,7 @@ export default class AutoStaker {
 
     const balanceResponse = await this.mirror.mirrorToken.getBalance();
     const balance = new Int(balanceResponse.balance);
-    const sellAmount = new Int(balance.divToInt(2));
+    const sellAmount = new Int(balance.divToInt(1.9));
     const mirrorAmount = balance.sub(sellAmount);
 
     console.log('Swap half rewards to UST');
