@@ -9,7 +9,8 @@ import {
   int
 } from '@terra-money/terra.js';
 
-const MNEMONIC = process.env.MNEMONIC;
+const MNEMONIC =
+  process.env.MNEMONIC != '' ? process.env.MNEMONIC : process.argv[3];
 const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
 const COIN_TYPE = parseInt(process.env.COIN_TYPE as string);
 
