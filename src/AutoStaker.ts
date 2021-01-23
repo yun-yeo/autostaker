@@ -6,7 +6,9 @@ import {
   Wallet,
   isTxError,
   Int,
-  Coin
+  Coin,
+  StdFee,
+  Coins
 } from '@terra-money/terra.js';
 
 const MNEMONIC = process.env.MNEMONIC;
@@ -28,9 +30,7 @@ export default class AutoStaker {
 
     const lcd = new LCDClient({
       URL: 'https://lcd.terra.dev',
-      chainID: 'columbus-4',
-      gasAdjustment: '1.2',
-      gasPrices: '0.0015uusd'
+      chainID: 'columbus-4'
     });
 
     this.mirror = new Mirror({
@@ -43,8 +43,10 @@ export default class AutoStaker {
   }
 
   async execute(msgs: Array<MsgExecuteContract>) {
+    // Use static fee
     const tx = await this.wallet.createAndSignTx({
-      msgs
+      msgs,
+      fee: new StdFee(333333, new Coins({ uusd: '500' }))
     });
 
     const result = await this.wallet.lcd.tx.broadcastSync(tx);
