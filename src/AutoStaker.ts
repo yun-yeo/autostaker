@@ -30,7 +30,9 @@ export default class AutoStaker {
 
     const lcd = new LCDClient({
       URL: 'https://lcd.terra.dev',
-      chainID: 'columbus-4'
+      chainID: 'columbus-4',
+      gasPrices: new Coins({ uusd: 0.0015 }),
+      gasAdjustment: 1.2
     });
 
     this.mirror = new Mirror({
@@ -45,8 +47,7 @@ export default class AutoStaker {
   async execute(msgs: Array<MsgExecuteContract>) {
     // Use static fee
     const tx = await this.wallet.createAndSignTx({
-      msgs,
-      fee: new StdFee(333333, new Coins({ uusd: '500' }))
+      msgs
     });
 
     const result = await this.wallet.lcd.tx.broadcastSync(tx);
