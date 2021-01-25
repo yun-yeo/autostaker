@@ -11,9 +11,12 @@ import {
   Coins
 } from '@terra-money/terra.js';
 
-const MNEMONIC = process.env.MNEMONIC;
+const LCD_URL = process.env.LCD_URL || 'https://lcd.terra.dev';
+
+const MNEMONIC = process.env.MNEMONIC as string;
 const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
 const COIN_TYPE = parseInt(process.env.COIN_TYPE as string);
+
 const TARGET_ASSET = process.env.TARGET_ASSET || 'MIR';
 
 export default class AutoStaker {
@@ -29,7 +32,7 @@ export default class AutoStaker {
     });
 
     const lcd = new LCDClient({
-      URL: 'https://lcd.terra.dev',
+      URL: LCD_URL,
       chainID: 'columbus-4',
       gasPrices: new Coins({ uusd: 0.0015 }),
       gasAdjustment: 1.2
