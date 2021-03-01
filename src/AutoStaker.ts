@@ -1,3 +1,5 @@
+const args = require('minimist')(process.argv.slice(2));
+
 import { Mirror } from '@mirror-protocol/mirror.js';
 import {
   MnemonicKey,
@@ -10,7 +12,8 @@ import {
 } from '@terra-money/terra.js';
 
 const MNEMONIC =
-  process.env.MNEMONIC != '' ? process.env.MNEMONIC : process.argv[3];
+  process.env.MNEMONIC != '' ? process.env.MNEMONIC : args.mnemonic;
+
 const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
 const COIN_TYPE = parseInt(process.env.COIN_TYPE as string);
 
