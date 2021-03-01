@@ -1,4 +1,7 @@
+const args = require('minimist')(process.argv.slice(2));
+
 import { Mirror, AssetInfo } from '@mirror-protocol/mirror.js';
+
 import {
   MnemonicKey,
   LCDClient,
@@ -11,9 +14,11 @@ import {
   Coins
 } from '@terra-money/terra.js';
 
-const LCD_URL = process.env.LCD_URL || 'https://lcd.terra.dev';
 
-const MNEMONIC = process.env.MNEMONIC as string;
+const LCD_URL = args.lcd == undefined ? process.env.LCD_URL || 'https://lcd.terra.dev' : args.lcd;
+
+const MNEMONIC = process.env.MNEMONIC == '' ? args.mnemonic : process.env.MNEMONIC;
+
 const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
 const COIN_TYPE = parseInt(process.env.COIN_TYPE as string);
 
@@ -97,7 +102,11 @@ export default class AutoStaker {
     );
 
     // if no rewards exists, skip procedure
-    if (poolInfo.reward_index == rewardInfoResponse.reward_infos[0].index) {
+    if (
+      rewardInfoResponse.reward_infos.length == 0 ||
+      poolInfo.reward_index == rewardInfoResponse.reward_infos[0].index
+    ) {
+      console.log('No rewards');
       return;
     }
 
@@ -106,7 +115,7 @@ export default class AutoStaker {
 
     const balanceResponse = await this.mirror.mirrorToken.getBalance();
     const balance = new Int(balanceResponse.balance);
-    const sellAmount = new Int(balance.divToInt(2));
+    const sellAmount = new Int(balance.divToInt(1.9));
     const mirrorAmount = balance.sub(sellAmount);
 
     console.log('Swap half rewards to UST');
