@@ -21,7 +21,7 @@ async function main() {
       process.exit(-1);
     });
 
-    await sleep(3900000);
+    await sleep(300000);
   }
 
   process.exit(0);
