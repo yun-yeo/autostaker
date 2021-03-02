@@ -1,6 +1,9 @@
 require('dotenv').config();
 
 import AutoStaker from './AutoStaker';
+const REWARD_CHECK_INTERVAL_MIN = parseInt(
+  process.env.REWARD_CHECK_INTERVAL_MIN || '10'
+);
 
 async function main() {
   const autoStaker = new AutoStaker();
@@ -21,7 +24,7 @@ async function main() {
       process.exit(-1);
     });
 
-    await sleep(300000);
+    await sleep(REWARD_CHECK_INTERVAL_MIN * 60 * 1000);
   }
 
   process.exit(0);

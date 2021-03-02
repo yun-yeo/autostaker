@@ -23,9 +23,9 @@ const MNEMONIC =
   process.env.MNEMONIC == '' ? args.mnemonic : process.env.MNEMONIC;
 
 const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
-const COIN_TYPE = parseInt((process.env.COIN_TYPE as string) || '330');
-const CONTRACT_EXEC_DELAY_MS = parseInt(
-  process.env.CONTRACT_EXEC_DELAY_MS || '15000'
+const COIN_TYPE = parseInt(process.env.COIN_TYPE || '330');
+const CONTRACT_EXEC_DELAY_SEC = parseInt(
+  process.env.CONTRACT_EXEC_DELAY_SEC || '15000'
 );
 
 const TARGET_ASSET = process.env.TARGET_ASSET || 'MIR';
@@ -76,7 +76,7 @@ export default class AutoStaker {
     }
 
     await this.pollingTx(result.txhash);
-    await sleep(CONTRACT_EXEC_DELAY_MS); // necessary to stagger contract execution so that various LB'd servers can be synced on the last transaction completed
+    await sleep(CONTRACT_EXEC_DELAY_SEC * 1000); // necessary to stagger contract execution so that various LB'd servers can be synced on the last transaction completed
   }
 
   async pollingTx(txHash: string) {
