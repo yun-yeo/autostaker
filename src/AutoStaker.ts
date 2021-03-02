@@ -1,4 +1,7 @@
+const args = require('minimist')(process.argv.slice(2));
+
 import { Mirror, AssetInfo } from '@mirror-protocol/mirror.js';
+
 import {
   MnemonicKey,
   LCDClient,
@@ -11,11 +14,19 @@ import {
   Coins
 } from '@terra-money/terra.js';
 
-const LCD_URL = process.env.LCD_URL || 'https://lcd.terra.dev';
+const LCD_URL =
+  args.lcd == undefined
+    ? process.env.LCD_URL || 'https://lcd.terra.dev'
+    : args.lcd;
 
-const MNEMONIC = process.env.MNEMONIC as string;
+const MNEMONIC =
+  process.env.MNEMONIC == '' ? args.mnemonic : process.env.MNEMONIC;
+
 const MNEMONIC_INDEX = parseInt(process.env.MNEMONIC_INDEX || '0');
-const COIN_TYPE = parseInt(process.env.COIN_TYPE as string);
+const COIN_TYPE = parseInt((process.env.COIN_TYPE as string) || '330');
+const CONTRACT_EXEC_DELAY_MS = parseInt(
+  process.env.CONTRACT_EXEC_DELAY_MS || '15000'
+);
 
 const TARGET_ASSET = process.env.TARGET_ASSET || 'MIR';
 
@@ -65,7 +76,7 @@ export default class AutoStaker {
     }
 
     await this.pollingTx(result.txhash);
-    await sleep(15000); // necessary to stagger contract execution so that various LB'd servers can be synced on the last transaction completed
+    await sleep(CONTRACT_EXEC_DELAY_MS); // necessary to stagger contract execution so that various LB'd servers can be synced on the last transaction completed
   }
 
   async pollingTx(txHash: string) {
@@ -96,14 +107,14 @@ export default class AutoStaker {
     console.log(`============== ${new Date().toLocaleString()} ==============`);
 
     // if no rewards exists, skip procedure
-    if (!await this.rewardsToClaim()) return;
+    if (!(await this.rewardsToClaim())) return;
 
     console.log('Claim Rewards');
     await this.execute([this.mirror.staking.withdraw()]);
 
     const balanceResponse = await this.mirror.mirrorToken.getBalance();
     const balance = new Int(balanceResponse.balance);
-    const sellAmount = new Int(balance.divToInt(1.95));
+    const sellAmount = new Int(balance.divToInt(1.9));
     const mirrorProvideAmount = balance.sub(sellAmount);
     console.log('  >> Wallet Mirror Balance:', toDecimal(balance));
 
@@ -124,7 +135,11 @@ export default class AutoStaker {
       )
     ]);
     const pool = await mirrorToken.pair.getPool();
-    console.log(`  >> ${toDecimal(sellAmount)} UST swapped to ${toDecimal(mirrorProvideAmount)} ${TARGET_ASSET}`)
+    console.log(
+      `  >> ${toDecimal(sellAmount)} UST swapped to ${toDecimal(
+        mirrorProvideAmount
+      )} ${TARGET_ASSET}`
+    );
 
     console.log('Provide Liquidity');
     const uusdProvideAmount = mirrorProvideAmount
@@ -154,7 +169,11 @@ export default class AutoStaker {
         }
       ])
     ]);
-    console.log(`  >> Provided ${toDecimal(mirrorProvideAmount)}${TARGET_ASSET} & ${toDecimal(uusdProvideAmount)}UST`);
+    console.log(
+      `  >> Provided ${toDecimal(
+        mirrorProvideAmount
+      )}${TARGET_ASSET} & ${toDecimal(uusdProvideAmount)}UST`
+    );
 
     console.log('Stake LP token');
     const lpTokenBalance = await mirrorToken.lpToken.getBalance();
@@ -165,7 +184,11 @@ export default class AutoStaker {
         mirrorToken.lpToken
       )
     ]);
-    console.log(`  >> Staked ${toDecimal({ d: [lpTokenBalance.balance] })} LP to ${TARGET_ASSET}-UST LP`);
+    console.log(
+      `  >> Staked ${toDecimal({
+        d: [lpTokenBalance.balance]
+      })} LP to ${TARGET_ASSET}-UST LP`
+    );
 
     console.log('Done');
   }
@@ -175,15 +198,15 @@ export default class AutoStaker {
     const assetToken = this.mirror.assets[TARGET_ASSET];
 
     this.assetTokenAddr = assetToken.token.contractAddress as string;
-    
+
     console.log(`============== ${new Date().toLocaleString()} ==============`);
 
     // if no rewards exists, skip procedure
-    if (!await this.rewardsToClaim()) return;
+    if (!(await this.rewardsToClaim())) return;
 
     console.log('Claim Rewards');
     await this.execute([this.mirror.staking.withdraw()]);
-    const mirBalanceResponse = await this.mirror.mirrorToken.getBalance(); 
+    const mirBalanceResponse = await this.mirror.mirrorToken.getBalance();
     const mirBalance = new Int(mirBalanceResponse.balance);
     console.log('  >> Wallet Mirror Balance:', toDecimal(mirBalance));
 
@@ -210,10 +233,16 @@ export default class AutoStaker {
     console.log('  >> Wallet UST Balance:', toDecimal(uusdBalance));
 
     console.log('Swap half UST to', TARGET_ASSET);
-    const uusdSellAmount = (uusdBalanceResponse.get('uusd') as Coin).div(2.1).toIntCoin().amount; // sell a little bit less than half to leave money for tx fees
-    const assetTokenBalance = new Int((await assetToken.token.getBalance()).balance);
+    const uusdSellAmount = (uusdBalanceResponse.get('uusd') as Coin)
+      .div(2.1)
+      .toIntCoin().amount; // sell a little bit less than half to leave money for tx fees
+    const assetTokenBalance = new Int(
+      (await assetToken.token.getBalance()).balance
+    );
     if (toDecimal(assetTokenBalance) > 0) {
-      throw new Error('Process Failed: Please manually convert mAsset to UST in wallet');
+      throw new Error(
+        'Process Failed: Please manually convert mAsset to UST in wallet'
+      );
     }
     await this.execute([
       assetToken.pair.swap(
@@ -223,18 +252,22 @@ export default class AutoStaker {
               denom: 'uusd'
             }
           },
-          amount: uusdSellAmount.toString(),
+          amount: uusdSellAmount.toString()
         },
-        {},
+        {}
       )
     ]);
     const assetProvideAmount = new Int(
       (await assetToken.token.getBalance()).balance
     );
-    console.log(`  >> ${toDecimal(uusdSellAmount)} UST swapped to ${toDecimal(assetProvideAmount)} ${TARGET_ASSET}`)
-      
+    console.log(
+      `  >> ${toDecimal(uusdSellAmount)} UST swapped to ${toDecimal(
+        assetProvideAmount
+      )} ${TARGET_ASSET}`
+    );
+
     console.log('Providing Liquidity');
-    let pool = await assetToken.pair.getPool();
+    const pool = await assetToken.pair.getPool();
     const uusdProvideAmount = assetProvideAmount
       .mul(pool.assets[0].amount)
       .divToInt(pool.assets[1].amount);
@@ -250,7 +283,7 @@ export default class AutoStaker {
               contract_addr: assetToken.token.contractAddress as string
             }
           },
-          amount: new Int(assetProvideAmount).toString(),
+          amount: new Int(assetProvideAmount).toString()
         },
         {
           info: {
@@ -258,11 +291,15 @@ export default class AutoStaker {
               denom: 'uusd'
             }
           },
-          amount: new Int(uusdProvideAmount).toString(),
+          amount: new Int(uusdProvideAmount).toString()
         }
       ])
     ]);
-    console.log(`  >> Provided ${toDecimal(assetProvideAmount)}${TARGET_ASSET} & ${toDecimal(uusdProvideAmount)}UST`);
+    console.log(
+      `  >> Provided ${toDecimal(
+        assetProvideAmount
+      )}${TARGET_ASSET} & ${toDecimal(uusdProvideAmount)}UST`
+    );
 
     console.log('Staking LP token');
     const lpTokenBalance = await assetToken.lpToken.getBalance();
@@ -273,7 +310,11 @@ export default class AutoStaker {
         assetToken.lpToken
       )
     ]);
-    console.log(`  >> Staked ${toDecimal({ d: [lpTokenBalance.balance] })} LP to ${TARGET_ASSET}-UST LP`);
+    console.log(
+      `  >> Staked ${toDecimal({
+        d: [lpTokenBalance.balance]
+      })} LP to ${TARGET_ASSET}-UST LP`
+    );
 
     console.log('Done');
   }
@@ -283,8 +324,9 @@ export default class AutoStaker {
       this.wallet.key.accAddress,
       this.assetTokenAddr
     );
-    const hasRewards = poolInfo.reward_index !== rewardInfoResponse.reward_infos[0].index;
-    if(!hasRewards) console.log('No Rewards to Claim this Interval');
+    const hasRewards =
+      poolInfo.reward_index !== rewardInfoResponse.reward_infos[0].index;
+    if (!hasRewards) console.log('No Rewards to Claim this Interval');
     return hasRewards;
   }
 }
@@ -295,9 +337,8 @@ function sleep(ms: number) {
 
 function toDecimal(ms: any) {
   if (ms.d.length === 1) {
-    return ms.d[0]/1000000;
+    return ms.d[0] / 1000000;
   } else {
-    return (ms.d[0]*10) + (ms.d[1]/1000000);
+    return ms.d[0] * 10 + ms.d[1] / 1000000;
   }
 }
-

@@ -7,13 +7,13 @@ AutoStaker for MirrorProtocol
 
    ```
    MNEMONIC=""
-   MNEMONIC_INDEX=0
-   COIN_TYPE=330
    TARGET_ASSET="MIR"
    ```  
    * MNEMONIC is your wallet seed phrase
    * TARGET is your desired autostake asset, one of ['MIR', 'mTSLA', 'mETH', etc...]
 
+   > You can leave `MNEMONIC=""` and then run the program using `npm start -- --mnemonic="your mnemonic"`
+   
    Or, you can use .env_example to create .env
    ```
    $ mv ./.env_example ./.env
