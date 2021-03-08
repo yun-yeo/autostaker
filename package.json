@@ -80,7 +80,6 @@
   "dependencies": {
     "@mirror-protocol/mirror.js": "^1.1.2",
     "@terra-money/terra.js": "^1.0.1",
-    "dotenv": "^8.2.0",
-    "minimist": "^1.2.5"
+    "dotenv": "^8.2.0"
   }
 }
