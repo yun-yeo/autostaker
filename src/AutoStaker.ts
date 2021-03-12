@@ -129,9 +129,7 @@ export default class AutoStaker {
           },
           amount: new Int(sellAmount).toString()
         },
-        {
-          offer_token: mirrorToken.token
-        }
+        {}
       )
     ]);
     const pool = await mirrorToken.pair.getPool();
@@ -221,9 +219,7 @@ export default class AutoStaker {
           },
           amount: new Int(mirBalance).toString()
         },
-        {
-          offer_token: mirrorToken.token
-        }
+        {}
       )
     ]);
     const uusdBalanceResponse = await this.lcd.bank.balance(
