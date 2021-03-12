@@ -21,12 +21,12 @@ AutoStaker for MirrorProtocol
    $ nano ./.env
    ```
 
-2. install dependency
+2. Install dependencies
    ```
    $ npm install
    ```
 
-3. start 
+3. Start
    ```
    $ npm start
    ```
