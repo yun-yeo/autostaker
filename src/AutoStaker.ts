@@ -27,6 +27,7 @@ const COIN_TYPE = parseInt(process.env.COIN_TYPE || '330');
 const CONTRACT_EXEC_DELAY_SEC = parseInt(
   process.env.CONTRACT_EXEC_DELAY_SEC || '15000'
 );
+const GAS_COST_USD = parseFloat(process.env.GAS_COST_USD || '0.15');
 
 const TARGET_ASSET = process.env.TARGET_ASSET || 'MIR';
 
@@ -46,7 +47,7 @@ export default class AutoStaker {
     const lcd = new LCDClient({
       URL: LCD_URL,
       chainID: 'columbus-4',
-      gasPrices: new Coins({ uusd: 0.0015 }),
+      gasPrices: new Coins({ uusd: GAS_COST_USD }),
       gasAdjustment: 1.2
     });
 
